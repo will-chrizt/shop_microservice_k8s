@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: cart-service
-        image: your-dockerhub-username/cart-service:1.0 # Replace with your image
+        image: willchrist/cart-service:latest # Replace with your image
         ports:
         - containerPort: 5002
         livenessProbe:

@@ -1,0 +1,60 @@
+# kubernetes/nginx-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  labels:
+    app: ecommerce-nginx-proxy
+data:
+  nginx.conf: |
+    # (Copy the entire nginx.conf content from above here)
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        upstream product_service {
+            server product-service:5001;
+        }
+
+        upstream cart_service {
+            server cart-service:5002;
+        }
+
+        upstream order_service {
+            server order-service:5003;
+        }
+
+        server {
+            listen 80;
+
+            location /products {
+                proxy_pass http://product_service;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            }
+
+            location /carts {
+                proxy_pass http://cart_service;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            }
+
+            location /orders {
+                proxy_pass http://order_service;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            }
+
+            location / {
+                return 200 "Welcome to the E-commerce API Gateway!";
+            }
+
+            location /healthz {
+                return 200 "nginx proxy is healthy";
+            }
+        }
+    }

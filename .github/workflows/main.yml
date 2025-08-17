@@ -53,7 +53,7 @@ jobs:
   # Job to deploy the applications to the Kubernetes cluster
   deploy-to-kubernetes:
     needs: build-and-push-images # This job depends on the successful completion of the build-and-push-images job
-    runs-on: ubuntu-latest # Use a fresh Ubuntu runner for deployment
+    runs-on: self-hosted # Use a fresh Ubuntu runner for deployment
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

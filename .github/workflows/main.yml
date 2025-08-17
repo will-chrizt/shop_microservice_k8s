@@ -1,0 +1,85 @@
+# .github/workflows/main.yml
+
+name: CI/CD Pipeline for E-commerce Microservices
+
+# Trigger the workflow on pushes to the main branch
+on:
+  push:
+    branches:
+      - main
+
+# Define environment variables that will be used across jobs
+env:
+  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_USERNAME }} # Your Docker Hub username stored as a GitHub Secret
+  # Define the Docker Hub image prefix (e.g., your-dockerhub-username/)
+  # Make sure this matches the username you used when pushing locally
+  DOCKER_IMAGE_PREFIX: your-dockerhub-username/ # IMPORTANT: Replace with your actual Docker Hub username followed by a slash!
+
+jobs:
+  # Job to build and push Docker images for each microservice
+  build-and-push-images:
+    runs-on: ubuntu-latest # Use a fresh Ubuntu runner
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # Action to check out your repository code
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3 # Action to log in to Docker Hub
+        with:
+          username: ${{ env.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }} # Your Docker Hub token/personal access token stored as a GitHub Secret
+
+      # --- Build and Push Product Service Image ---
+      - name: Build and Push Product Service Image
+        working-directory: ./product-service # Change to the service's directory
+        run: |
+          docker build -t ${{ env.DOCKER_IMAGE_PREFIX }}product-service:latest .
+          docker push ${{ env.DOCKER_IMAGE_PREFIX }}product-service:latest
+
+      # --- Build and Push Cart Service Image ---
+      - name: Build and Push Cart Service Image
+        working-directory: ./cart-service # Change to the service's directory
+        run: |
+          docker build -t ${{ env.DOCKER_IMAGE_PREFIX }}cart-service:latest .
+          docker push ${{ env.DOCKER_IMAGE_PREFIX }}cart-service:latest
+
+      # --- Build and Push Order Service Image ---
+      - name: Build and Push Order Service Image
+        working-directory: ./order-service # Change to the service's directory
+        run: |
+          docker build -t ${{ env.DOCKER_IMAGE_PREFIX }}order-service:latest .
+          docker push ${{ env.DOCKER_IMAGE_PREFIX }}order-service:latest
+
+  # Job to deploy the applications to the Kubernetes cluster
+  deploy-to-kubernetes:
+    needs: build-and-push-images # This job depends on the successful completion of the build-and-push-images job
+    runs-on: ubuntu-latest # Use a fresh Ubuntu runner for deployment
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Kubeconfig
+        uses: azure/k8s-set-context@v3 # Action to set up Kubernetes context
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG_DATA }} # Your kubeconfig data stored as a GitHub Secret
+
+      # --- Apply Kubernetes Manifests for Microservices ---
+      - name: Apply Product Service Manifests
+        run: kubectl apply -f kubernetes/product-service-deployment.yaml -f kubernetes/product-service-service.yaml
+
+      - name: Apply Cart Service Manifests
+        run: kubectl apply -f kubernetes/cart-service-deployment.yaml -f kubernetes/cart-service-service.yaml
+
+      - name: Apply Order Service Manifests
+        run: kubectl apply -f kubernetes/order-service-deployment.yaml -f kubernetes/order-service-service.yaml
+
+      # --- Apply Kubernetes Manifests for NGINX Proxy ---
+      - name: Apply NGINX ConfigMap
+        run: kubectl apply -f kubernetes/nginx-configmap.yaml
+
+      - name: Apply NGINX Proxy Manifests
+        run: kubectl apply -f kubernetes/nginx-proxy-deployment.yaml -f kubernetes/nginx-proxy-service.yaml
+
+      - name: Restart NGINX Proxy Deployment to pick up ConfigMap changes
+        run: kubectl rollout restart deployment/ecommerce-nginx-proxy

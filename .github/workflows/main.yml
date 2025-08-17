@@ -13,7 +13,7 @@ env:
   DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_USERNAME }} # Your Docker Hub username stored as a GitHub Secret
   # Define the Docker Hub image prefix (e.g., your-dockerhub-username/)
   # Make sure this matches the username you used when pushing locally
-  DOCKER_IMAGE_PREFIX: your-dockerhub-username/ # IMPORTANT: Replace with your actual Docker Hub username followed by a slash!
+  DOCKER_IMAGE_PREFIX: willchrist/ # IMPORTANT: Replace with your actual Docker Hub username followed by a slash!
 
 jobs:
   # Job to build and push Docker images for each microservice

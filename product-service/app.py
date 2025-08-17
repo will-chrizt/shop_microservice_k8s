@@ -4,7 +4,7 @@ from flask import Flask, jsonify
 app = Flask(__name__)
 
 products = [
-    {"id": "1", "name": "Laptop", "price": 1200.00, "description": "Powerful laptop for all your needs."},
+    {"id": "1", "name": "Laptop", "price": 1200.00, "description": "Powerful laptops for all your needs."},
     {"id": "2", "name": "Mouse", "price": 25.00, "description": "Ergonomic wireless mouse."},
     {"id": "3", "name": "Keyboard", "price": 75.00, "description": "Mechanical gaming keyboard."},
     {"id": "4", "name": "Monitor", "price": 300.00, "description": "27-inch 4K monitor."},

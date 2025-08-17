@@ -66,20 +66,20 @@ jobs:
 
       # --- Apply Kubernetes Manifests for Microservices ---
       - name: Apply Product Service Manifests
-        run: kubectl apply -f kubernetes/product-service-deployment.yaml -f kubernetes/product-service-service.yaml
+        run: kubectl apply -f kubernetes/product-service-deployment.yaml 
 
       - name: Apply Cart Service Manifests
-        run: kubectl apply -f kubernetes/cart-service-deployment.yaml -f kubernetes/cart-service-service.yaml
+        run: kubectl apply -f kubernetes/cart-service-deployment.yaml
 
       - name: Apply Order Service Manifests
-        run: kubectl apply -f kubernetes/order-service-deployment.yaml -f kubernetes/order-service-service.yaml
+        run: kubectl apply -f kubernetes/order-service-deployment.yaml 
 
       # --- Apply Kubernetes Manifests for NGINX Proxy ---
       - name: Apply NGINX ConfigMap
         run: kubectl apply -f kubernetes/nginx-configmap.yaml
 
       - name: Apply NGINX Proxy Manifests
-        run: kubectl apply -f kubernetes/nginx-proxy-deployment.yaml -f kubernetes/nginx-proxy-service.yaml
+        run: kubectl apply -f kubernetes/nginx-proxy-deployment.yaml 
 
       - name: Restart NGINX Proxy Deployment to pick up ConfigMap changes
         run: kubectl rollout restart deployment/ecommerce-nginx-proxy
